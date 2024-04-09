@@ -4,9 +4,10 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-type vBoxLayout struct{}
+// This struct will implement the fyne.Layout interface.
+type LastItemFullheightVBoxLayout struct{}
 
-func (v *vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+func (v *LastItemFullheightVBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	width := float32(0)
 	height := float32(0)
 
@@ -19,7 +20,7 @@ func (v *vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(width, height)
 }
 
-func (v *vBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+func (v *LastItemFullheightVBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	posY := float32(0)
 	for _, o := range objects[:len(objects)-1] { // layout all but the last item
 		o.Resize(fyne.NewSize(size.Width, o.MinSize().Height))
@@ -33,7 +34,7 @@ func (v *vBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	last.Move(fyne.NewPos(0, posY))
 }
 
-// NewVBoxLayout creates a new vertical box layout
-func NewVBoxLayout() fyne.Layout {
-	return &vBoxLayout{}
+// NewLastItemFullheightVBoxLayout creates a new vertical box layout
+func NewLastItemFullheightVBoxLayout() fyne.Layout {
+	return &LastItemFullheightVBoxLayout{}
 }

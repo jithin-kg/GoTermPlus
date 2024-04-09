@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jithin-kg/GoTermPlus/pkg/sshclient"
 	"github.com/jithin-kg/GoTermPlus/pkg/ui/terminal"
 	"golang.org/x/crypto/ssh"
 )
@@ -40,8 +41,9 @@ func NewHomeScreen(window fyne.Window) fyne.CanvasObject {
 				Title:   "Connection Established",
 				Content: "Ssh connection established sucessfully.",
 			})
-			window.SetContent(terminal.NewTerminalScreen(window, client))
-			window.Resize(fyne.NewSize(800, 600)) // Set a reasonable minimum size for the window
+			// transition to terminal_screen
+			sshClient := sshclient.NewSSHClient(client)
+			window.SetContent(terminal.NewTerminalScreen(window, sshClient))
 		}
 		go connectToSSH(details)
 

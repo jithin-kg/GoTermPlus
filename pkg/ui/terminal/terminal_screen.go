@@ -1,27 +1,35 @@
 package terminal
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"golang.org/x/crypto/ssh"
+	"github.com/jithin-kg/GoTermPlus/pkg/sshclient"
 )
 
-func NewTerminalScreen(window fyne.Window, client *ssh.Client) fyne.CanvasObject {
-	// list directories and files
-	listItems, err := listDirectories(client, "/")
-	if err != nil {
-		log.Printf("Failed to list directories %v", err)
-	}
+func NewTerminalScreen(window fyne.Window, client *sshclient.SSHClient) fyne.CanvasObject {
 
 	// file browser pane
-	fileBrowser := setupFileBrowser(listItems)
+	// fileBrowser := setupFileBrowser(nil)
+	data := binding.BindStringList(&[]string{})
+
+	// Create the file browser pane using NewListWithData and the data binding
+	fileBrowser := widget.NewListWithData(data,
+		func() fyne.CanvasObject {
+			// Return the template for list items
+			return widget.NewLabel("")
+		},
+		func(i binding.DataItem, o fyne.CanvasObject) {
+			// Bind the list item to the data item
+			str, _ := i.(binding.String).Get() // Extract the string from the binding
+			o.(*widget.Label).SetText(str)     // Set the label text
+		},
+	)
 	fileBrowserScroll := container.NewScroll(fileBrowser)
 
 	container.NewScroll(fileBrowser)
@@ -37,13 +45,23 @@ func NewTerminalScreen(window fyne.Window, client *ssh.Client) fyne.CanvasObject
 		// Add more toolbar actions as needed
 		layout.NewSpacer(), // Pushes everything to the left
 	)
-	fmt.Println(topPanel)
 	// assemble screen using horizontal split container
 	hSplit := container.NewHSplit(fileBrowserScroll, terminalScroll)
 	hSplit.Offset = 0.25 // initial split ratio
 	// return hSplit
-	return container.New(NewVBoxLayout(), topPanel, hSplit)
+	content := container.New(NewLastItemFullheightVBoxLayout(), topPanel, hSplit)
 
+	// list directories and files
+	// perform directory listing in a seperate goroutin
+	go func() {
+		listItems, err := client.ListDirectories("/")
+		if err != nil {
+			log.Printf("Failed to list directories %v", err)
+		}
+		data.Set(listItems)
+
+	}()
+	return content
 }
 func setupTerminal() *widget.Entry {
 	// Create terminal pane with multiline entry
@@ -73,19 +91,4 @@ func setupFileBrowser(listItems []string) *widget.List {
 	)
 
 	return fb
-}
-func listDirectories(client *ssh.Client, path string) ([]string, error) {
-	session, err := client.NewSession()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
-	}
-	defer session.Close()
-	// command to list directories and files
-	cmd := fmt.Sprintf("ls -l %s", path)
-	ouput, err := session.CombinedOutput(cmd)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute command %s: %w", cmd, err)
-	}
-	lines := strings.Split(string(ouput), "\n")
-	return lines, nil
 }
