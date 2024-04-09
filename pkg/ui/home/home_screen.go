@@ -41,6 +41,7 @@ func NewHomeScreen(window fyne.Window) fyne.CanvasObject {
 				Content: "Ssh connection established sucessfully.",
 			})
 			window.SetContent(terminal.NewTerminalScreen(window, client))
+			window.Resize(fyne.NewSize(800, 600)) // Set a reasonable minimum size for the window
 		}
 		go connectToSSH(details)
 

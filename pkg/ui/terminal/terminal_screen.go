@@ -41,9 +41,9 @@ func NewTerminalScreen(window fyne.Window, client *ssh.Client) fyne.CanvasObject
 	// assemble screen using horizontal split container
 	hSplit := container.NewHSplit(fileBrowserScroll, terminalScroll)
 	hSplit.Offset = 0.25 // initial split ratio
-	// hSplit.StretchRight
-	// return container.New(layout.NewGridLayout(2), fileBrowserScroll, terminalScroll)
-	return container.NewBorder(topPanel, nil, nil, hSplit)
+	// return hSplit
+	return container.New(NewVBoxLayout(), topPanel, hSplit)
+
 }
 func setupTerminal() *widget.Entry {
 	// Create terminal pane with multiline entry
