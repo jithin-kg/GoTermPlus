@@ -21,15 +21,15 @@ func (c *SSHClient) ListDirectories(path string) ([]string, error) {
 	}
 	defer session.Close()
 	// command to list directories and files
-	cmd := "ls -l ~"
-	// cmd := "ls /home/go-code/sample"
+	// cmd := "ls -l ~"
+	cmd := "ls /home/go-code/sample"
 	ouput, err := session.CombinedOutput(cmd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute command %s: %w", cmd, err)
 	}
 
 	lines := strings.Split(string(ouput), "\n")
-	fmt.Println("ouput", ouput)
-	fmt.Println("lines", lines)
+	// fmt.Println("ouput", ouput)
+	// fmt.Println("lines", lines)
 	return lines, nil
 }
