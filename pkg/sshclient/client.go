@@ -14,22 +14,25 @@ type SSHClient struct {
 func NewSSHClient(client *ssh.Client) *SSHClient {
 	return &SSHClient{Client: client}
 }
-func (c *SSHClient) ListDirectories(path string) ([]string, error) {
+
+func (c *SSHClient) ExecuteCommand(command string) (string, error) {
 	session, err := c.Client.NewSession()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
+		return "", fmt.Errorf("failed to create session: %w", err)
 	}
 	defer session.Close()
-	// command to list directories and files
-	// cmd := "ls -l ~"
-	cmd := "ls /home/go-code/sample"
-	ouput, err := session.CombinedOutput(cmd)
+	ouput, err := session.CombinedOutput(command)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute command %s: %w", cmd, err)
+		return "", fmt.Errorf("failed to execute command '%s' : %w", command, err)
 	}
+	return string(ouput), nil
+}
+func (c *SSHClient) ListDirectories(path string) ([]string, error) {
+	output, err := c.ExecuteCommand(fmt.Sprintf("ls -l %s", path))
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(output, "\n")
 
-	lines := strings.Split(string(ouput), "\n")
-	// fmt.Println("ouput", ouput)
-	// fmt.Println("lines", lines)
 	return lines, nil
 }
