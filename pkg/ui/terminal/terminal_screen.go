@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jithin-kg/GoTermPlus/pkg/sshclient"
-	custom "github.com/jithin-kg/GoTermPlus/pkg/ui/custom_components"
 )
 
 func NewTerminalScreen(window fyne.Window, client *sshclient.SSHClient) fyne.CanvasObject {
@@ -73,39 +72,11 @@ func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 	terminalOutput.MultiLine = true
 	terminalOutput.Wrapping = fyne.TextWrapOff
 	terminalOutput.Disable() //make it read only
-
-	// input are for typing commands
-	terminalInput := custom.NewMultiLineEntry()
-	terminalInput.SetPlaceHolder("Type commands here....")
-
-	// store command history
-	var commandHistory []string
-
-	// function to execute command display its output
-	executeCommand := func(command string) {
-		commandHistory = append(commandHistory, command)
-
-		go func() {
-			output, err := client.ExecuteCommand(command)
-			if err != nil {
-				log.Printf("Error executing command '%s': %v", command, err)
-				output = "Error: " + err.Error()
-			}
-			terminalOutput.SetText(terminalInput.Text + command + "\n" + output + "\n")
-			terminalInput.SetText("") // clear input field
-		}()
-	}
-	// handle command execution on enter press
-	terminalInput.OnSubmitted = func(content string) {
-		if content == "" {
-			return
-		}
-		executeCommand(content)
-		terminalInput.AddHistory(content)
-	}
-	// history  function
-
-	terminalLayout := container.NewBorder(nil, terminalInput, nil, nil, terminalOutput)
+	// terminalInput is for typing commands
+	terminalInput := NewTerminalInput(client, func(output string) {
+		terminalOutput.SetText(terminalOutput.Text + "\n" + output)
+	})
+	terminalLayout := container.NewBorder(nil, terminalInput.GetEtry(), nil, nil, terminalOutput)
 
 	return container.NewPadded(terminalLayout)
 }
