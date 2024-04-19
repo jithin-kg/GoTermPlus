@@ -1,6 +1,7 @@
 package terminal
 
 import (
+	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -12,7 +13,8 @@ import (
 // CustomMultiLineEntry struct holds the text content and the scroll container.
 type CustomMultiLineEntry struct {
 	widget.BaseWidget
-	textLabel       *widget.Label
+	textEntry       *widget.Entry
+	originalText    string // Store the original text
 	scrollContainer *container.Scroll
 }
 
@@ -20,11 +22,21 @@ type CustomMultiLineEntry struct {
 func NewCustomMultiLineEntry() *CustomMultiLineEntry {
 	e := &CustomMultiLineEntry{}
 	e.ExtendBaseWidget(e)
-	e.textLabel = widget.NewLabel("")
-	e.textLabel.Wrapping = fyne.TextWrapBreak // Enable word wrapping
-	e.textLabel.TextStyle.Monospace = true    // Optional: Set monospace for terminal style
-	e.scrollContainer = container.NewVScroll(container.NewWithoutLayout(e.textLabel))
+	e.textEntry = widget.NewMultiLineEntry()
+	e.textEntry.OnChanged = func(s string) {
+		fmt.Print("on -changed")
+		e.textEntry.SetText(e.originalText)
+	}
+	e.textEntry.Wrapping = fyne.TextWrapBreak
+	e.textEntry.TextStyle.Monospace = true
+	e.scrollContainer = container.NewVScroll(e.textEntry)
 	return e
+}
+
+// SetText sets the text and stores it as the original text
+func (e *CustomMultiLineEntry) SetText(text string) {
+	e.originalText = text // Update original text
+	e.textEntry.SetText(text)
 }
 
 // CreateRenderer creates a renderer for CustomMultiLineEntry.
@@ -34,45 +46,37 @@ func (e *CustomMultiLineEntry) CreateRenderer() fyne.WidgetRenderer {
 
 // Custom renderer for CustomMultiLineEntry.
 type customMultiLineEntryRenderer struct {
-	entry *CustomMultiLineEntry
-	// textContent     *canvas.Text
+	entry           *CustomMultiLineEntry
 	scrollContainer *container.Scroll
 }
 
-// MinSize calculates the minimum size of the widget.
 func (r *customMultiLineEntryRenderer) MinSize() fyne.Size {
 	return r.scrollContainer.MinSize()
 }
 
-// Layout resizes and positions the widget's elements.
 func (r *customMultiLineEntryRenderer) Layout(size fyne.Size) {
 	r.scrollContainer.Resize(size)
 }
 
-// Refresh updates the widget when the data changes.
 func (r *customMultiLineEntryRenderer) Refresh() {
-	// r.textContent.Refresh()
-	r.entry.textLabel.Refresh()
+	r.entry.textEntry.Refresh()
 	r.scrollContainer.Refresh()
 }
 
-// Objects returns all objects in the renderer.
 func (r *customMultiLineEntryRenderer) Objects() []fyne.CanvasObject {
 	return []fyne.CanvasObject{r.scrollContainer}
 }
 
-// BackgroundColor returns the background color of the widget.
 func (r *customMultiLineEntryRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
-// Destroy cleans up any resources.
 func (r *customMultiLineEntryRenderer) Destroy() {}
 
 // AppendText adds new text to the existing content.
 func (e *CustomMultiLineEntry) AppendText(text string) {
-	// e.textContent.Text += text + "\n" // Append new text as a new line.
-	e.textLabel.SetText(e.textLabel.Text + text + "\n") // Append new text as a new line.
+	e.originalText += text + "\n" // Append new text as a new line
+	e.textEntry.SetText(e.originalText)
 	e.Refresh()
 }
 
@@ -80,4 +84,11 @@ func (e *CustomMultiLineEntry) AppendText(text string) {
 func (e *CustomMultiLineEntry) Refresh() {
 	e.BaseWidget.Refresh()
 	e.scrollContainer.ScrollToBottom() // Auto-scroll to bottom.
+}
+
+// OnChanged is an overridden method to intercept changes and prevent them
+func (e *CustomMultiLineEntry) OnChanged() {
+
+	// Reset to original text to ignore any user changes
+	e.textEntry.SetText(e.originalText)
 }
