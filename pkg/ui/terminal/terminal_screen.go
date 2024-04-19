@@ -29,6 +29,26 @@ func NewTerminalScreen(window fyne.Window, client *sshclient.SSHClient) fyne.Can
 	populateFileBrowserAsync(data, client)
 	return content
 }
+func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
+	// output area for command results
+	terminalOutput := NewTerminalOuput()
+	// terminalInput is for typing commands
+	terminalInput := NewTerminalInput(client, func(output string) {
+		terminalOutput.AppendText(output)
+	})
+
+	// path label to show current directory
+	pathLabel := widget.NewLabel("~/projects")
+	pathLabel.Wrapping = fyne.TextWrapOff
+	pathLabel.Alignment = fyne.TextAlignLeading
+	pathLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	// wrap the pathLabel and terminalInput in a Vbox
+	inputContainer := container.NewVBox(pathLabel, terminalInput.GetEtry())
+	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput.GetWidget())
+
+	return container.NewPadded(terminalLayout)
+}
 
 func populateFileBrowserAsync(data binding.StringList, client *sshclient.SSHClient) {
 	go func() {
@@ -65,27 +85,4 @@ func createTopPanel() *fyne.Container {
 		// Add more toolbar actions as needed
 		layout.NewSpacer(), // Pushes everything to the left
 	)
-}
-func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
-	// output area for command results
-	terminalOutput := widget.NewMultiLineEntry()
-	terminalOutput.MultiLine = true
-	terminalOutput.Wrapping = fyne.TextWrapOff
-	terminalOutput.Disable() //make it read only
-	// terminalInput is for typing commands
-	terminalInput := NewTerminalInput(client, func(output string) {
-		terminalOutput.SetText(terminalOutput.Text + "\n" + output)
-	})
-
-	// path label to show current directory
-	pathLabel := widget.NewLabel("~/projects")
-	pathLabel.Wrapping = fyne.TextWrapOff
-	pathLabel.Alignment = fyne.TextAlignLeading
-	pathLabel.TextStyle = fyne.TextStyle{Bold: true}
-
-	// wrap the pathLabel and terminalInput in a Vbox
-	inputContainer := container.NewVBox(pathLabel, terminalInput.GetEtry())
-	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput)
-
-	return container.NewPadded(terminalLayout)
 }
