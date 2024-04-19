@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jithin-kg/GoTermPlus/pkg/sshclient"
+	custom "github.com/jithin-kg/GoTermPlus/pkg/ui/custom_widgets"
 )
 
 func NewTerminalScreen(window fyne.Window, client *sshclient.SSHClient) fyne.CanvasObject {
@@ -27,14 +28,16 @@ func NewTerminalScreen(window fyne.Window, client *sshclient.SSHClient) fyne.Can
 
 	// perform directory listing in a seperate goroutin
 	populateFileBrowserAsync(data, client)
+
 	return content
 }
 func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 	// output area for command results
-	terminalOutput := NewCustomMultiLineEntry()
+	// terminalOutput := NewCustomMultiLineEntry()
+	terminalOutput := custom.NewConsoleWriter()
 	// terminalInput is for typing commands
 	terminalInput := NewTerminalInput(client, func(output string) {
-		terminalOutput.AppendText(output)
+		terminalOutput.Write(output)
 	})
 
 	// path label to show current directory
@@ -43,9 +46,12 @@ func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 	pathLabel.Alignment = fyne.TextAlignLeading
 	pathLabel.TextStyle = fyne.TextStyle{Bold: true}
 
+	scrollButton := widget.NewButton("Scroll to Bottom", func() {
+		terminalOutput.Scroll()
+	})
 	// wrap the pathLabel and terminalInput in a Vbox
 	inputContainer := container.NewVBox(pathLabel, terminalInput.GetEtry())
-	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput)
+	terminalLayout := container.NewBorder(nil, inputContainer, scrollButton, nil, terminalOutput.ConsoleScroll)
 
 	return container.NewPadded(terminalLayout)
 }
