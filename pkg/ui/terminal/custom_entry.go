@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -13,29 +12,30 @@ import (
 // CustomMultiLineEntry struct holds the text content and the scroll container.
 type CustomMultiLineEntry struct {
 	widget.BaseWidget
-	textContent     *canvas.Text
+	textLabel       *widget.Label
 	scrollContainer *container.Scroll
 }
 
 // NewCustomMultiLineEntry initializes the CustomMultiLineEntry with default settings.
 func NewCustomMultiLineEntry() *CustomMultiLineEntry {
 	e := &CustomMultiLineEntry{}
-	e.ExtendBaseWidget(e)                                       // Crucial for lifecycle management and rendering.
-	e.textContent = canvas.NewText("", theme.ForegroundColor()) // Use the current theme's foreground color.
-	e.textContent.TextStyle.Monospace = true                    // Optional: Set monospace for terminal style.
-	e.scrollContainer = container.NewVScroll(container.NewWithoutLayout(e.textContent))
+	e.ExtendBaseWidget(e)
+	e.textLabel = widget.NewLabel("")
+	e.textLabel.Wrapping = fyne.TextWrapBreak // Enable word wrapping
+	e.textLabel.TextStyle.Monospace = true    // Optional: Set monospace for terminal style
+	e.scrollContainer = container.NewVScroll(container.NewWithoutLayout(e.textLabel))
 	return e
 }
 
 // CreateRenderer creates a renderer for CustomMultiLineEntry.
 func (e *CustomMultiLineEntry) CreateRenderer() fyne.WidgetRenderer {
-	return &customMultiLineEntryRenderer{entry: e, textContent: e.textContent, scrollContainer: e.scrollContainer}
+	return &customMultiLineEntryRenderer{entry: e, scrollContainer: e.scrollContainer}
 }
 
 // Custom renderer for CustomMultiLineEntry.
 type customMultiLineEntryRenderer struct {
-	entry           *CustomMultiLineEntry
-	textContent     *canvas.Text
+	entry *CustomMultiLineEntry
+	// textContent     *canvas.Text
 	scrollContainer *container.Scroll
 }
 
@@ -51,7 +51,8 @@ func (r *customMultiLineEntryRenderer) Layout(size fyne.Size) {
 
 // Refresh updates the widget when the data changes.
 func (r *customMultiLineEntryRenderer) Refresh() {
-	r.textContent.Refresh()
+	// r.textContent.Refresh()
+	r.entry.textLabel.Refresh()
 	r.scrollContainer.Refresh()
 }
 
@@ -70,7 +71,8 @@ func (r *customMultiLineEntryRenderer) Destroy() {}
 
 // AppendText adds new text to the existing content.
 func (e *CustomMultiLineEntry) AppendText(text string) {
-	e.textContent.Text += text + "\n" // Append new text as a new line.
+	// e.textContent.Text += text + "\n" // Append new text as a new line.
+	e.textLabel.SetText(e.textLabel.Text + text + "\n") // Append new text as a new line.
 	e.Refresh()
 }
 
