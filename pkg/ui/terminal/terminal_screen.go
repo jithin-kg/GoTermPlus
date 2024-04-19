@@ -76,7 +76,16 @@ func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 	terminalInput := NewTerminalInput(client, func(output string) {
 		terminalOutput.SetText(terminalOutput.Text + "\n" + output)
 	})
-	terminalLayout := container.NewBorder(nil, terminalInput.GetEtry(), nil, nil, terminalOutput)
+
+	// path label to show current directory
+	pathLabel := widget.NewLabel("~/projects")
+	pathLabel.Wrapping = fyne.TextWrapOff
+	pathLabel.Alignment = fyne.TextAlignLeading
+	pathLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	// wrap the pathLabel and terminalInput in a Vbox
+	inputContainer := container.NewVBox(pathLabel, terminalInput.GetEtry())
+	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput)
 
 	return container.NewPadded(terminalLayout)
 }

@@ -20,6 +20,7 @@ func NewTerminalInput(client *sshclient.SSHClient, onCommandOutput func(string))
 		onCommandOutput: onCommandOutput,
 	}
 	ti.Setup()
+
 	return ti
 }
 func (ti *TerminalInput) Setup() {
