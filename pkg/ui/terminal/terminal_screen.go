@@ -31,7 +31,7 @@ func NewTerminalScreen(window fyne.Window, client *sshclient.SSHClient) fyne.Can
 }
 func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 	// output area for command results
-	terminalOutput := NewTerminalOuput()
+	terminalOutput := NewCustomMultiLineEntry()
 	// terminalInput is for typing commands
 	terminalInput := NewTerminalInput(client, func(output string) {
 		terminalOutput.AppendText(output)
@@ -45,7 +45,7 @@ func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 
 	// wrap the pathLabel and terminalInput in a Vbox
 	inputContainer := container.NewVBox(pathLabel, terminalInput.GetEtry())
-	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput.GetWidget())
+	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput)
 
 	return container.NewPadded(terminalLayout)
 }
