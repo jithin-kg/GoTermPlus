@@ -28,7 +28,10 @@ func NewConsoleWriter() *ConsoleWriter {
 // Write adds text to the console and ensures it scrolls appropriately.
 func (cw *ConsoleWriter) Write(text string) {
 	entry := widget.NewLabel(text)
+	// entry := &widget.Label{Text: text, Wrapping: fyne.TextWrapBreak, TextStyle:fyne.TextStyle{Monospace: true} }
 	entry.Wrapping = fyne.TextWrapBreak // Ensure text wraps if too long
+	entry.TextStyle = fyne.TextStyle{Monospace: true}
+
 	cw.Console.Add(entry)
 	cw.Console.Add(entry)
 	// cw.Console.Add(&canvas.Text{

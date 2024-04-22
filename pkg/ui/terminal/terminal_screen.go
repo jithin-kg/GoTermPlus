@@ -46,12 +46,12 @@ func createTerminalPane(client *sshclient.SSHClient) *fyne.Container {
 	pathLabel.Alignment = fyne.TextAlignLeading
 	pathLabel.TextStyle = fyne.TextStyle{Bold: true}
 
-	scrollButton := widget.NewButton("Scroll to Bottom", func() {
-		terminalOutput.Scroll()
-	})
+	// scrollButton := widget.NewButton("Scroll to Bottom", func() {
+	// 	terminalOutput.Scroll()
+	// })
 	// wrap the pathLabel and terminalInput in a Vbox
 	inputContainer := container.NewVBox(pathLabel, terminalInput.GetEtry())
-	terminalLayout := container.NewBorder(nil, inputContainer, scrollButton, nil, terminalOutput.ConsoleScroll)
+	terminalLayout := container.NewBorder(nil, inputContainer, nil, nil, terminalOutput.ConsoleScroll)
 
 	return container.NewPadded(terminalLayout)
 }
